@@ -1,2 +1,3 @@
 venv
-apache_airflow/apache_config
+apache_airflow
+!apache_airflow/dags/*

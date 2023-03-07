@@ -1,5 +1,5 @@
-from newspaper import Article
 import requests
+from newspaper import Article
 from bs4 import BeautifulSoup
 
 
