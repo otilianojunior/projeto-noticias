@@ -21,7 +21,7 @@ def requisicao_api_noticias(urls):
     for url in urls:
         response = None
         try:
-            response = requests.get('http://0.0.0.0:8000/api_noticias/diariamente', params={'url': url}, timeout=10)
+            response = requests.get('http://0.0.0.0:8000/api_noticias/diariamente', params={'url': url}, timeout=180)
         except requests.exceptions.Timeout:
             pass
         except requests.exceptions.RequestException as e:

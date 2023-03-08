@@ -1,10 +1,12 @@
 import requests
 from newspaper import Article
 from bs4 import BeautifulSoup
+from server.consultas.Abstract.AbstractConsultas import ArticleConsulta
 
 
-class NoticiasConsulta:
+class NoticiasConsulta(ArticleConsulta):
     def __init__(self, url):
+        super().__init__(self)
         self.url = url
 
     def noticias(self):
@@ -20,7 +22,7 @@ class NoticiasConsulta:
                     except:
                         pass
 
-            return noticias
+            self.insertMany(noticias)
         except Exception as ex:
             print(ex)
             raise Exception
