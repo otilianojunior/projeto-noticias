@@ -1,12 +1,13 @@
 import requests
+import datetime
 from newspaper import Article
 from bs4 import BeautifulSoup
-from server.consultas.Abstract.AbstractConsultas import ArticleConsulta
+from server.consultas.Abstract.AbstractConsultas import AbstractConsultas
 
 
-class NoticiasConsulta(ArticleConsulta):
+class NoticiasConsulta(AbstractConsultas):
     def __init__(self, url):
-        super().__init__(self)
+        super().__init__(url)
         self.url = url
 
     def noticias(self):
@@ -22,7 +23,8 @@ class NoticiasConsulta(ArticleConsulta):
                     except:
                         pass
 
-            self.insertMany(noticias)
+            response = self.insertMany(noticias)
+            return response
         except Exception as ex:
             print(ex)
             raise Exception
@@ -50,11 +52,12 @@ class NoticiasConsulta(ArticleConsulta):
             imagens = article.images
 
             noticia = {
+                'data_hora_insercao': str(datetime.datetime.now()),
                 'titulo': titulo,
                 'data_publicacao': str(data_publicacao),
                 'autores': autores,
                 'texto': texto,
-                'imagens': imagens
+                'imagens': list(imagens)
             }
 
             return noticia

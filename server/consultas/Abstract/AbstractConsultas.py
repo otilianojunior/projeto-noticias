@@ -3,7 +3,7 @@ from newspaper import Article
 from server.config.MongoDBConfig import MongoDBConfig
 
 
-class ArticleConsulta(ABC):
+class AbstractConsultas(ABC):
     def __init__(self, url):
         self.url = url
         self.article = Article(url)

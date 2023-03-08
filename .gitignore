@@ -2,3 +2,4 @@ venv
 apache_airflow
 !apache_airflow/dags/*
 .env
+.idea
