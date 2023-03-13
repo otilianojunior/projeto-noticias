@@ -3,3 +3,4 @@ apache_airflow
 !apache_airflow/dags/*
 .env
 .idea
+__pycache__
