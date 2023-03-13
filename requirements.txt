@@ -9,3 +9,4 @@
  python-dotenv==1.0.0
  requests==2.27.1
  beautifulsoup4==4.11.2
+ requests-futures == 1.0.0
