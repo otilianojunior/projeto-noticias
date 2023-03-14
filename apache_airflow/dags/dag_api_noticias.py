@@ -1,6 +1,6 @@
+import logging
 import os
 import json
-import logging
 import requests
 from airflow import DAG
 from datetime import datetime
@@ -8,9 +8,7 @@ from datetime import timedelta
 from dotenv import load_dotenv
 from pymongo import MongoClient
 from requests.exceptions import RequestException
-from airflow.operators.python import PythonOperator, BranchPythonOperator
-
-
+from airflow.operators.python import PythonOperator
 
 load_dotenv()
 
@@ -46,33 +44,23 @@ def api_request(url):
         return None
 
 
-
 def connect_to_mongo(**kwargs):
     client = MongoClient(mongo_url)
     db = client['noticias-diarias-db']
     collection = db['noticias']
     noticias = collection.find()
     noticias_dict = [n.to_dict() for n in noticias]
-    kwargs['ti'].xcom_push(key='noticias_dict', value=noticias_dict)
-    kwargs['ti'].xcom_push(key='collection', value=collection) # adicionado
-   
+    kwargs['ti'].xcom_push(key='noticias_dict', value=json.dumps(noticias_dict))
+    noticias_dict_serialized = [n.serialize() for n in noticias_dict]
+    kwargs['ti'].xcom_push(key='noticias_dict_serialized', value=json.dumps(noticias_dict_serialized))
+
+
 
 
 def save_data_to_mongo(**kwargs):
     noticias_dict = kwargs['ti'].xcom_pull(task_ids='connect_to_mongo', key='noticias_dict')
     collection = kwargs['ti'].xcom_pull(task_ids='connect_to_mongo', key='collection')
-    documents = []
-    for article in noticias_dict:
-        document = {
-            'title': article['titulo'],
-            'url': article['url'],
-            'data_publicacao': article.get('data_publicacao'),
-            'autores': article.get('autores'),
-            'texto': article['texto'],
-            'imagens': article.get('imagens'),
-            'data_hora_insercao': datetime.now()
-        }
-        documents.append(document)
+    documents = [json.dumps(article) for article in noticias_dict]
     result = collection.insert_many(documents)
     logging.info(f"Inseridos {len(result.inserted_ids)} documentos no banco")
 
@@ -90,7 +78,7 @@ def fetch_and_save(url, mongo_url, **kwargs):
 
     # Define o resultado da tarefa como o nome do site
     return url.split('/')[-1]
- 
+
 
 # Cria a conexão com o MongoDB antes de executar as tasks de inserção de dados
 connect_task = PythonOperator(
@@ -99,7 +87,6 @@ connect_task = PythonOperator(
     provide_context=True,  # Adicionado
     dag=dag
 )
-
 
 for site_name, url in sites.items():
     task_id = f'request_{site_name.lower().replace(" ", "_")}'
@@ -123,12 +110,3 @@ for site_name, url in sites.items():
 
     # Define a dependência da save_task em relação à fetch_task
     save_task.set_upstream(fetch_task)
-
-save_task = PythonOperator(
-    task_id='save_data_to_mongo',
-    provide_context=True,
-    python_callable=save_data_to_mongo,
-    op_kwargs={'data': '{{ ti.xcom_pull(task_ids="extract_data") }}',
-               'collection': 'noticias'}
-)
-

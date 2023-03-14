@@ -7,10 +7,9 @@
     <list default="true" id="c2ed635b-d3f0-42b2-aa3b-eecf2d7fbb01" name="Changes" comment="feat: apache-airflow em andamento">
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/apache_airflow/dags/dag_api_noticias.py" beforeDir="false" afterPath="$PROJECT_DIR$/apache_airflow/dags/dag_api_noticias.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/config/MongoDBConfig.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/config/__init__.py" beforeDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/consultas/Abstract/AbstractConsultas.py" beforeDir="false" afterPath="$PROJECT_DIR$/server/consultas/Abstract/AbstractConsultas.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/consultas/noticias/Noticias.py" beforeDir="false" afterPath="$PROJECT_DIR$/server/consultas/noticias/Noticias.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/controller/NoticiasController.py" beforeDir="false" afterPath="$PROJECT_DIR$/server/controller/NoticiasController.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/model/dto/NOTICIADTO.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/model/dto/__init__.py" beforeDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
