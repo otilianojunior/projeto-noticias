@@ -5,13 +5,12 @@
   </component>
   <component name="ChangeListManager">
     <list default="true" id="c2ed635b-d3f0-42b2-aa3b-eecf2d7fbb01" name="Changes" comment="feat: apache-airflow em andamento">
-      <change afterPath="$PROJECT_DIR$/server/model/dto/NOTICIADTO.py" afterDir="false" />
-      <change afterPath="$PROJECT_DIR$/server/model/dto/__init__.py" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/.idea/workspace.xml" beforeDir="false" afterPath="$PROJECT_DIR$/.idea/workspace.xml" afterDir="false" />
       <change beforePath="$PROJECT_DIR$/apache_airflow/dags/dag_api_noticias.py" beforeDir="false" afterPath="$PROJECT_DIR$/apache_airflow/dags/dag_api_noticias.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/requirements.txt" beforeDir="false" afterPath="$PROJECT_DIR$/requirements.txt" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/controller/NoticiasController.py" beforeDir="false" afterPath="$PROJECT_DIR$/server/controller/NoticiasController.py" afterDir="false" />
-      <change beforePath="$PROJECT_DIR$/server/model/params/BasicParamConsulta.py" beforeDir="false" afterPath="$PROJECT_DIR$/server/model/params/BasicParamConsulta.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/config/MongoDBConfig.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/config/__init__.py" beforeDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/consultas/Abstract/AbstractConsultas.py" beforeDir="false" afterPath="$PROJECT_DIR$/server/consultas/Abstract/AbstractConsultas.py" afterDir="false" />
+      <change beforePath="$PROJECT_DIR$/server/consultas/noticias/Noticias.py" beforeDir="false" afterPath="$PROJECT_DIR$/server/consultas/noticias/Noticias.py" afterDir="false" />
     </list>
     <option name="SHOW_DIALOG" value="false" />
     <option name="HIGHLIGHT_CONFLICTS" value="true" />
@@ -36,14 +35,14 @@
     <option name="hideEmptyMiddlePackages" value="true" />
     <option name="showLibraryContents" value="true" />
   </component>
-  <component name="PropertiesComponent"><![CDATA[{
-  "keyToString": {
-    "ASKED_MARK_IGNORED_FILES_AS_EXCLUDED": "true",
-    "RunOnceActivity.OpenProjectViewOnStart": "true",
-    "RunOnceActivity.ShowReadmeOnStart": "true",
-    "last_opened_file_path": "/home/dev-veri/Documentos/projeto-noticias/server/model/dto"
+  <component name="PropertiesComponent">{
+  &quot;keyToString&quot;: {
+    &quot;ASKED_MARK_IGNORED_FILES_AS_EXCLUDED&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.OpenProjectViewOnStart&quot;: &quot;true&quot;,
+    &quot;RunOnceActivity.ShowReadmeOnStart&quot;: &quot;true&quot;,
+    &quot;last_opened_file_path&quot;: &quot;/home/otiliano/Documentos/PROJETOS/projeto-noticias&quot;
   }
-}]]></component>
+}</component>
   <component name="RecentsManager">
     <key name="CopyFile.RECENT_KEYS">
       <recent name="$PROJECT_DIR$/server/model/dto" />
@@ -116,6 +115,9 @@
     </task>
     <option name="localTasksCounter" value="8" />
     <servers />
+  </component>
+  <component name="UnknownFeatures">
+    <option featureType="com.intellij.fileTypeFactory" implementationName="requirements.txt" />
   </component>
   <component name="VcsManagerConfiguration">
     <MESSAGE value="feat: apache-airflow em andamento" />

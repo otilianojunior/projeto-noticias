@@ -23,8 +23,7 @@ class NoticiasConsulta(AbstractConsultas):
                     except:
                         pass
 
-            response = self.insertMany(noticias)
-            return response
+            return noticias
         except Exception as ex:
             print(ex)
             raise Exception

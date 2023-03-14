@@ -1,13 +1,11 @@
 from abc import ABC
 from newspaper import Article
-from server.config.MongoDBConfig import MongoDBConfig
 
 
 class AbstractConsultas(ABC):
     def __init__(self, url):
         self.url = url
         self.article = Article(url)
-        self.collection = MongoDBConfig.get_client()['noticias-diarias-db']['noticias']
 
     def download_and_parse(self):
         self.article.download()
@@ -27,7 +25,3 @@ class AbstractConsultas(ABC):
 
     def get_images(self):
         return self.article.images
-
-    def insertMany(self, documents):
-        result = self.collection.insert_many(documents)
-        return result.inserted_ids
