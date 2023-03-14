@@ -1,112 +1,93 @@
-import logging
 import os
-import json
+import pymongo
+import logging
 import requests
+import json
+import bson.json_util
+import collections
 from airflow import DAG
 from datetime import datetime
-from datetime import timedelta
-from dotenv import load_dotenv
-from pymongo import MongoClient
 from requests.exceptions import RequestException
+from concurrent.futures import ThreadPoolExecutor
 from airflow.operators.python import PythonOperator
-
-load_dotenv()
+from requests_futures.sessions import FuturesSession
 
 default_args = {
     'owner': 'Otiliano Junior',
-    'start_date': datetime(2023, 3, 11, 8, 30, 0),
-    'end_date': None,  # or a specific date
-    'schedule_interval': timedelta(days=1)
+    'start_date': datetime(2023, 3, 11, 8, 30, 0)
 }
 
-dag = DAG('api_request', default_args=default_args)
+dag = DAG('api_request', default_args=default_args, schedule_interval='@daily')
 
 sites = {
-    'BBC Brasil': 'https://www.bbc.com/portuguese/topics/cz74k717pw5t',
-    'ESTADÃO CULTURA': 'https://www.estadao.com.br/cultura/'
+    'BBC Brasil': 'https://www.bbc.com/portuguese/topics/cz74k717pw5t'
 }
+MONGO_CONNECTION_STRING = os.getenv('MONGO_CONNECTION_STRING')
 
-mongo_url = os.environ.get('MONGO_CONNECTION_STRING')
-BASE_URL = 'http://0.0.0.0:8000/'
-task_ids = {f'request_{site_name.lower().replace(" ", "_")}': site_name for site_name, url in sites.items()}
+
+def get_mongo_connection():
+    return pymongo.MongoClient(MONGO_CONNECTION_STRING)
 
 
 def api_request(url):
-    url_api = BASE_URL + 'api_noticias/diariamente'
+    url_api = 'http://0.0.0.0:8000/api_noticias/diariamente'
     payload = {'url': url}
     try:
         response = requests.post(url_api, json=payload)
         response.raise_for_status()
-        logging.info(f"Request to {url} successful. Response: {response.json()}")
-        return response.text
+        data = response.json()
+        # trate os dados aqui, se necessário
+        logging.info(f"Request to {url} successful. Response: {data}")
+        return json.dumps(data)
     except RequestException as e:
         logging.error(f"Request to {url} failed: {e}")
         return None
 
 
-def connect_to_mongo(**kwargs):
-    client = MongoClient(mongo_url)
-    db = client['noticias-diarias-db']
-    collection = db['noticias']
-    noticias = collection.find()
-    noticias_dict = [n.to_dict() for n in noticias]
-    kwargs['ti'].xcom_push(key='noticias_dict', value=json.dumps(noticias_dict))
-    noticias_dict_serialized = [n.serialize() for n in noticias_dict]
-    kwargs['ti'].xcom_push(key='noticias_dict_serialized', value=json.dumps(noticias_dict_serialized))
-
-
-
-
-def save_data_to_mongo(**kwargs):
-    noticias_dict = kwargs['ti'].xcom_pull(task_ids='connect_to_mongo', key='noticias_dict')
-    collection = kwargs['ti'].xcom_pull(task_ids='connect_to_mongo', key='collection')
-    documents = [json.dumps(article) for article in noticias_dict]
-    result = collection.insert_many(documents)
-    logging.info(f"Inseridos {len(result.inserted_ids)} documentos no banco")
-
-
-
-def fetch_and_save(url, mongo_url, **kwargs):
-    response_text = api_request(url)
-    if response_text is None:
+def save_data_mongo(**context):
+    data_str = context['ti'].xcom_pull(task_ids='api_request_task')
+    if not data_str:
+        logging.error('Não há dados para serem salvos no MongoDB.')
         return
-    response_data = json.loads(response_text)
+    try:
+        data = json.loads(data_str, object_hook=bson.json_util.object_hook)
+        if not isinstance(data, dict):
+            data = dict(data)
+        client = get_mongo_connection()
+        db = client['noticias-diarias-db']
+        collection = db['noticias']
+        result = collection.insert_many([data])
+        logging.info('Dados salvos no MongoDB com sucesso. IDs: {}'.format(
+            result.inserted_ids))
+    except Exception as e:
+        logging.error(
+            'Erro ao salvar dados no MongoDB. Mensagem: {}'.format(str(e)))
 
-    # Salva os dados no MongoDB
-    collection = kwargs['ti'].xcom_pull(task_ids='connect_to_mongo', key='collection')
-    save_data_to_mongo(collection=collection, **kwargs)
 
-    # Define o resultado da tarefa como o nome do site
-    return url.split('/')[-1]
+def optimize_url_selection(sites):
+    # Remove duplicate URLs from the "sites" dictionary
+    unique_urls = set(sites.values())
+    return {k: v for k, v in sites.items() if v in unique_urls}
 
 
-# Cria a conexão com o MongoDB antes de executar as tasks de inserção de dados
-connect_task = PythonOperator(
-    task_id='connect_to_mongo',
-    python_callable=connect_to_mongo,
-    provide_context=True,  # Adicionado
-    dag=dag
-)
+sites = optimize_url_selection(sites)
+
+session = FuturesSession(executor=ThreadPoolExecutor(max_workers=len(sites)))
 
 for site_name, url in sites.items():
     task_id = f'request_{site_name.lower().replace(" ", "_")}'
-    fetch_task = PythonOperator(
+    api_request_task = PythonOperator(
         task_id=task_id,
-        python_callable=fetch_and_save,
-        op_kwargs={'url': url, 'mongo_url': mongo_url},
-        provide_context=True,
+        python_callable=api_request,
+        op_kwargs={'url': url},
         dag=dag
     )
 
-    # Define a dependência da fetch_task em relação à connect_task
-    fetch_task.set_upstream(connect_task)
-
-    save_task = PythonOperator(
+    save_to_mongo_task = PythonOperator(
         task_id=f'save_to_mongo_{site_name.lower().replace(" ", "_")}',
-        python_callable=save_data_to_mongo,
-        op_kwargs={'data': '{{ ti.xcom_pull(task_ids=' + task_id + ') }}'},
-        dag=dag
+        python_callable=save_data_mongo,
+        provide_context=True,
+        dag=dag,
     )
 
-    # Define a dependência da save_task em relação à fetch_task
-    save_task.set_upstream(fetch_task)
+    api_request_task >> save_to_mongo_task

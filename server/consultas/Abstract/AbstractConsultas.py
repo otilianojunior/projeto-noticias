@@ -22,6 +22,3 @@ class AbstractConsultas(ABC):
 
     def get_text(self):
         return self.article.text
-
-    def get_images(self):
-        return self.article.images

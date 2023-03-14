@@ -10,20 +10,23 @@ class NoticiasConsulta(AbstractConsultas):
         super().__init__(url)
         self.url = url
 
+    class NoticiasConsulta(AbstractConsultas):
+        def __init__(self, url):
+            super().__init__(url)
+            self.url = url
+
     def noticias(self):
         try:
             links = self.get_links()
-            noticias = []
 
             for link in links:
                 if 'http' in link:
                     try:
                         noticia = self.get_info_noticia(link)
-                        noticias.append(noticia)
+                        yield noticia
                     except:
                         pass
 
-            return noticias
         except Exception as ex:
             print(ex)
             raise Exception
@@ -48,15 +51,13 @@ class NoticiasConsulta(AbstractConsultas):
             data_publicacao = article.publish_date
             autores = article.authors
             texto = article.text
-            imagens = article.images
 
             noticia = {
                 'data_hora_insercao': str(datetime.datetime.now()),
                 'titulo': titulo,
                 'data_publicacao': str(data_publicacao),
                 'autores': autores,
-                'texto': texto,
-                'imagens': list(imagens)
+                'texto': texto
             }
 
             return noticia
